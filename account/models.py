@@ -7,6 +7,3 @@ class Account(AbstractUser):
     bio = TextField()
     following = ManyToManyField("self", related_name="followers", symmetrical=False, blank=True)
 
-# class Follower(Model):
-#     following_to = ForeignKey("account.Account", CASCADE, related_name="followers")
-#     followed_by = ForeignKey("account.Account", CASCADE, related_name="following")
