@@ -1,0 +1,61 @@
+    {% extends 'base.html' %}
+
+{% block content %}
+   
+    <div class="container mt-4">
+        <h3>Room {{ room.name }}</h3>
+        <div id="chat-messages" class="border rounded p-3 mb-4" style="height: 300px; overflow-y: scroll;">
+            {% for message in mesages %}
+                <p><strong><a href="{% url 'account:profile' username=message.user.username %}">{{ message.user.username }}</a></strong>: {{ message.body }}</p>
+            {% endfor %}
+        </div>
+        <form method="post" class="d-flex">
+            {% csrf_token %}
+            <input id="message" type="text" class="form-control me-2" placeholder="Enter your message">
+            <button id="send-button" class="btn btn-primary">Send</button>
+        </form>
+    </div>
+
+    {{ request.user.username|json_script:"username" }}
+    {{ room.slug|json_script:"room-slug" }}
+    <script>
+        const username = JSON.parse(document.getElementById("username").textContent);
+        const room_slug = JSON.parse(document.getElementById("room-slug").textContent);
+        const profileUrlTemplate = "{% url 'account:profile' username='USERNAME_PLACEHOLDER' %}";
+        const address = window.location.host;
+
+        const ws = new WebSocket(
+            'ws://'
+            + address
+            + "/ws/"
+            + room_slug
+            + "/"
+        );
+
+        document.getElementById("send-button").onclick = function (e) {
+            e.preventDefault();
+            const textinput = document.getElementById("message");
+            const message = textinput.value;
+            textinput.value = "";
+            if (message) {
+                ws.send(
+                    JSON.stringify({
+                            "message": message,
+                            "username": username,
+                            "room": room_slug
+                        }
+                    )
+                );
+            }
+        };
+
+        ws.onmessage = function (e) {
+            const msg = JSON.parse(e.data);
+            const profileUrl = profileUrlTemplate.replace('USERNAME_PLACEHOLDER', msg.username);
+            let html = '<p><strong><a href="' + profileUrl + '">'
+                    + (msg.username ? msg.username : 'anonim') + '</a></strong>: ' + msg.message + '</p>';
+            document.getElementById("chat-messages").innerHTML += html;
+        };
+    </script>
+     {% csrf_token %}
+{% endblock %}

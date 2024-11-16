@@ -1,0 +1,4 @@
+channels==3.0.4
+django==4.0.0
+Pillow==11.0.0
+

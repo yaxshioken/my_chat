@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}
+    Rooms  List
+{% endblock %}
+{% block content %}
+    <h3>Room List</h3>
+    <ul type="none">
+
+        {% for room in rooms %}
+            <li><a href="{% url 'chat:room' slug=room.slug %}">{{ room.name }}</a></li>
+        {% endfor %}
+        <h4 ><a href={% url 'account:register' %}  >Logout</a> </h4>
+
+    </ul>
+{% csrf_token %}
+{% endblock %}
